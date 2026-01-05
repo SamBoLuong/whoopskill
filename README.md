@@ -1,4 +1,4 @@
-# whoopskill
+# WHOOP Skill
 
 CLI for fetching WHOOP health data via the WHOOP API v2.
 
