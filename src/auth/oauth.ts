@@ -46,9 +46,13 @@ export async function login(): Promise<void> {
   authUrl.searchParams.set('state', state);
 
   console.log('Opening browser for authorization...');
-  await open(authUrl.toString());
+  console.log('\nIf browser does not open, visit this URL:\n');
+  console.log(authUrl.toString());
+  console.log('');
 
-  const callbackUrl = await prompt('\nPaste the callback URL here: ');
+  await open(authUrl.toString()).catch(() => {});
+
+  const callbackUrl = await prompt('Paste the callback URL here: ');
 
   const url = new URL(callbackUrl);
   const code = url.searchParams.get('code');
