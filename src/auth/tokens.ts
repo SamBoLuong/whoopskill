@@ -7,6 +7,9 @@ import { WhoopError, ExitCode } from '../utils/errors.js';
 const CONFIG_DIR = join(homedir(), '.whoop-cli');
 const TOKEN_FILE = join(CONFIG_DIR, 'tokens.json');
 
+// Refresh tokens 15 minutes before expiry to avoid race conditions
+const REFRESH_BUFFER_SECONDS = 900;
+
 function ensureConfigDir(): void {
   if (!existsSync(CONFIG_DIR)) {
     mkdirSync(CONFIG_DIR, { recursive: true, mode: 0o700 });
@@ -49,7 +52,7 @@ export function clearTokens(): void {
 
 export function isTokenExpired(tokens: TokenData): boolean {
   const now = Math.floor(Date.now() / 1000);
-  return now >= tokens.expires_at - 60;
+  return now >= tokens.expires_at - REFRESH_BUFFER_SECONDS;
 }
 
 export async function refreshAccessToken(tokens: TokenData): Promise<TokenData> {
@@ -70,11 +73,20 @@ export async function refreshAccessToken(tokens: TokenData): Promise<TokenData> 
       refresh_token: tokens.refresh_token,
       client_id: clientId,
       client_secret: clientSecret,
+      scope: 'offline',
     }),
   });
 
   if (!response.ok) {
-    throw new WhoopError('Token refresh failed', ExitCode.AUTH_ERROR, response.status);
+    const errorBody = await response.text();
+    let errorMsg = `Token refresh failed (${response.status})`;
+    try {
+      const errorJson = JSON.parse(errorBody);
+      errorMsg = errorJson.error_description || errorJson.error || errorMsg;
+    } catch {
+      // Use default error message
+    }
+    throw new WhoopError(errorMsg, ExitCode.AUTH_ERROR, response.status);
   }
 
   const data = (await response.json()) as OAuthTokenResponse;
