@@ -1,6 +1,6 @@
 {
   "name": "whoopskill",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "CLI for fetching WHOOP health data",
   "type": "module",
   "bin": {
@@ -21,7 +21,13 @@
     "health",
     "fitness",
     "cli",
-    "api"
+    "api",
+    "hrv",
+    "recovery",
+    "sleep",
+    "strain",
+    "insights",
+    "trends"
   ],
   "author": "",
   "license": "MIT",

@@ -68,3 +68,42 @@ export function formatSummary(data: WhoopData): string {
 
   return parts.length ? `${data.date} | ${parts.join(' | ')}` : `${data.date} | No data`;
 }
+
+function statusIcon(value: number, green: number, yellow: number, invert = false): string {
+  if (invert) {
+    return value <= green ? '🟢' : value <= yellow ? '🟡' : '🔴';
+  }
+  return value >= green ? '🟢' : value >= yellow ? '🟡' : '🔴';
+}
+
+export function formatSummaryColor(data: WhoopData): string {
+  const lines: string[] = [`📅 ${data.date}`];
+
+  if (data.recovery?.length) {
+    const r = data.recovery[0].score;
+    const icon = statusIcon(r.recovery_score, 67, 34);
+    lines.push(`${icon} Recovery: ${r.recovery_score}% | HRV: ${r.hrv_rmssd_milli.toFixed(0)}ms | RHR: ${r.resting_heart_rate}bpm`);
+  }
+
+  if (data.sleep?.length) {
+    const s = data.sleep[0].score;
+    const icon = statusIcon(s.sleep_performance_percentage, 85, 70);
+    const hours = (s.stage_summary.total_in_bed_time_milli / 3600000).toFixed(1);
+    lines.push(`${icon} Sleep: ${s.sleep_performance_percentage}% | ${hours}h | Efficiency: ${s.sleep_efficiency_percentage.toFixed(0)}%`);
+  }
+
+  if (data.cycle?.length) {
+    const c = data.cycle[0].score;
+    const recoveryScore = data.recovery?.[0]?.score?.recovery_score ?? 50;
+    const optimal = recoveryScore >= 67 ? 14 : recoveryScore >= 34 ? 10 : 6;
+    const diff = Math.abs(c.strain - optimal);
+    const icon = diff <= 2 ? '🟢' : diff <= 4 ? '🟡' : '🔴';
+    lines.push(`${icon} Strain: ${c.strain.toFixed(1)} (optimal: ~${optimal}) | ${(c.kilojoule / 4.184).toFixed(0)} cal`);
+  }
+
+  if (data.workout?.length) {
+    lines.push(`🏋️ Workouts: ${data.workout.length} | ${data.workout.map(w => w.sport_name).join(', ')}`);
+  }
+
+  return lines.join('\n');
+}
