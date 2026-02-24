@@ -1,4 +1,4 @@
-import { getValidTokens } from '../auth/tokens.js';
+import { clearTokens, getValidTokens } from '../auth/tokens.js';
 import { BASE_URL, ENDPOINTS } from './endpoints.js';
 import { WhoopError, ExitCode } from '../utils/errors.js';
 import type {
@@ -191,6 +191,7 @@ export async function getActivityMapping(activityV1Id: number): Promise<Activity
 
 export async function revokeUserAccess(): Promise<{ revoked: true }> {
   await requestNoContent(ENDPOINTS.userAccess, { method: 'DELETE' });
+  clearTokens();
   return { revoked: true as const };
 }
 

@@ -43,7 +43,7 @@ export interface SleepScore {
 export interface WhoopSleep {
   id: string;
   cycle_id: number;
-  v1_id?: number;
+  v1_id?: number | null;
   user_id: number;
   created_at: string;
   updated_at: string;
@@ -97,7 +97,7 @@ export interface WorkoutScore {
 
 export interface WhoopWorkout {
   id: string;
-  v1_id?: number;
+  v1_id?: number | null;
   user_id: number;
   created_at: string;
   updated_at: string;

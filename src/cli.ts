@@ -22,6 +22,7 @@ import { analyzeTrends, generateInsights, formatTrends, formatInsights } from '.
 import type { DataType, WhoopData, WhoopCycle, WhoopRecovery, WhoopSleep, WhoopWorkout } from './types/whoop.js';
 
 export const program = new Command();
+program.enablePositionalOptions();
 
 interface PrettyOption {
   pretty?: boolean;
@@ -98,19 +99,29 @@ function validateDateTimeOption(value: string | undefined, flag: '--start' | '--
 }
 
 function parseLimit(limit: string): number {
-  const parsed = Number.parseInt(limit, 10);
-  if (Number.isNaN(parsed) || parsed <= 0 || parsed > 25) {
+  if (!/^\d+$/.test(limit)) {
+    throw new WhoopError('Limit must be an integer between 1 and 25', ExitCode.GENERAL_ERROR);
+  }
+  const parsed = Number(limit);
+  if (!Number.isSafeInteger(parsed) || parsed <= 0 || parsed > 25) {
     throw new WhoopError('Limit must be an integer between 1 and 25', ExitCode.GENERAL_ERROR);
   }
   return parsed;
 }
 
-function parseCycleId(value: string): number {
-  const cycleId = Number.parseInt(value, 10);
-  if (Number.isNaN(cycleId) || cycleId <= 0) {
-    throw new WhoopError('cycle_id must be a positive integer', ExitCode.GENERAL_ERROR);
+function parsePositiveInteger(value: string, fieldName: string): number {
+  if (!/^\d+$/.test(value)) {
+    throw new WhoopError(`${fieldName} must be a positive integer`, ExitCode.GENERAL_ERROR);
   }
-  return cycleId;
+  const parsed = Number(value);
+  if (!Number.isSafeInteger(parsed) || parsed <= 0) {
+    throw new WhoopError(`${fieldName} must be a positive integer`, ExitCode.GENERAL_ERROR);
+  }
+  return parsed;
+}
+
+function parseCycleId(value: string): number {
+  return parsePositiveInteger(value, 'cycle_id');
 }
 
 function wrapSingleRecord(key: SingleRecordKey, date: string, item: SingleRecord): WhoopData {
@@ -247,10 +258,7 @@ program
   .argument('<activityV1Id>', 'v1 activity id (integer)')
   .action(async (activityV1Id: string) => {
     try {
-      const id = Number.parseInt(activityV1Id, 10);
-      if (Number.isNaN(id) || id <= 0) {
-        throw new WhoopError('activityV1Id must be a positive integer', ExitCode.GENERAL_ERROR);
-      }
+      const id = parsePositiveInteger(activityV1Id, 'activityV1Id');
       const result = await getActivityMapping(id);
       console.log(JSON.stringify(result, null, 2));
     } catch (error) {
@@ -400,14 +408,6 @@ program
       validateDateTimeOption(options.start, '--start');
       validateDateTimeOption(options.end, '--end');
 
-      const fetchOptions = {
-        limit: parseLimit(options.limit),
-        all: options.all,
-        start: options.start,
-        end: options.end,
-        nextToken: options.nextToken,
-      };
-
       const types: DataType[] = [];
       if (options.sleep) types.push('sleep');
       if (options.recovery) types.push('recovery');
@@ -415,6 +415,26 @@ program
       if (options.cycle) types.push('cycle');
       if (options.profile) types.push('profile');
       if (options.body) types.push('body');
+
+      if (options.nextToken) {
+        const collectionTypes = types.filter(
+          (type): type is SingleRecordKey => ['sleep', 'recovery', 'workout', 'cycle'].includes(type)
+        );
+        if (types.length !== 1 || collectionTypes.length !== 1) {
+          throw new WhoopError(
+            '--next-token can only be used with exactly one collection type: --sleep, --recovery, --workout, or --cycle',
+            ExitCode.GENERAL_ERROR
+          );
+        }
+      }
+
+      const fetchOptions = {
+        limit: parseLimit(options.limit),
+        all: options.all,
+        start: options.start,
+        end: options.end,
+        nextToken: options.nextToken,
+      };
 
       const result = types.length === 0
         ? await fetchAllTypes(date, fetchOptions)

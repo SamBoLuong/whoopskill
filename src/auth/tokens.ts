@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync, mkdirSync, existsSync, chmodSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync, chmodSync, unlinkSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 import type { TokenData, OAuthTokenResponse } from '../types/whoop.js';
@@ -46,7 +46,7 @@ export function loadTokens(): TokenData | null {
 
 export function clearTokens(): void {
   if (existsSync(TOKEN_FILE)) {
-    writeFileSync(TOKEN_FILE, '');
+    unlinkSync(TOKEN_FILE);
   }
 }
 
