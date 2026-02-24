@@ -22,6 +22,10 @@ Quick start
 - `whoopskill sleep` — sleep performance, stages
 - `whoopskill workout` — workouts with strain
 - `whoopskill --date 2025-01-03` — specific date
+- `whoopskill sleep --id <sleep_uuid>` — query sleep by id
+- `whoopskill recovery --cycle-id <cycle_id>` — query recovery via cycle relation
+- `whoopskill mapping <v1_activity_id>` — lookup v2 UUID from v1 id
+- `whoopskill access revoke` — revoke app access for current member
 
 Analysis commands
 - `summary` — quick health snapshot (add `--color` for status indicators)
@@ -42,7 +46,16 @@ Combine types
 Auth
 - `whoopskill auth login` — OAuth flow (opens browser)
 - `whoopskill auth status` — check token status
+- `whoopskill auth refresh` — refresh token proactively
 - `whoopskill auth logout` — clear tokens
+
+Coverage
+- Supports official WHOOP endpoints for profile, body, sleep/workout/cycle collections and by-id, cycle->sleep/recovery, v1 activity mapping, and user access revoke.
+
+Query features
+- `--start` / `--end` ISO datetime range filtering
+- `--limit` (1-25) and `--all`
+- `--next-token` pagination continuation
 
 Notes
 - Output is JSON to stdout (use `--pretty` for human-readable)

@@ -1,3 +1,5 @@
+export type ScoreState = 'SCORED' | 'PENDING_SCORE' | 'UNSCORABLE';
+
 export interface WhoopProfile {
   user_id: number;
   email: string;
@@ -32,14 +34,16 @@ export interface SleepNeeded {
 export interface SleepScore {
   stage_summary: SleepStageSummary;
   sleep_needed: SleepNeeded;
-  respiratory_rate: number;
-  sleep_performance_percentage: number;
-  sleep_consistency_percentage: number;
-  sleep_efficiency_percentage: number;
+  respiratory_rate?: number;
+  sleep_performance_percentage?: number;
+  sleep_consistency_percentage?: number;
+  sleep_efficiency_percentage?: number;
 }
 
 export interface WhoopSleep {
-  id: number;
+  id: string;
+  cycle_id: number;
+  v1_id?: number;
   user_id: number;
   created_at: string;
   updated_at: string;
@@ -47,7 +51,8 @@ export interface WhoopSleep {
   end: string;
   timezone_offset: string;
   nap: boolean;
-  score: SleepScore;
+  score_state: ScoreState;
+  score?: SleepScore;
 }
 
 export interface RecoveryScore {
@@ -65,8 +70,17 @@ export interface WhoopRecovery {
   user_id: number;
   created_at: string;
   updated_at: string;
-  score_state: string;
-  score: RecoveryScore;
+  score_state: ScoreState;
+  score?: RecoveryScore;
+}
+
+export interface ZoneDurations {
+  zone_zero_milli: number;
+  zone_one_milli: number;
+  zone_two_milli: number;
+  zone_three_milli: number;
+  zone_four_milli: number;
+  zone_five_milli: number;
 }
 
 export interface WorkoutScore {
@@ -74,21 +88,16 @@ export interface WorkoutScore {
   average_heart_rate: number;
   max_heart_rate: number;
   kilojoule: number;
-  percent_recorded?: number;
+  percent_recorded: number;
   distance_meter?: number;
   altitude_gain_meter?: number;
-  zone_durations?: {
-    zone_zero_milli: number;
-    zone_one_milli: number;
-    zone_two_milli: number;
-    zone_three_milli: number;
-    zone_four_milli: number;
-    zone_five_milli: number;
-  };
+  altitude_change_meter?: number;
+  zone_durations: ZoneDurations;
 }
 
 export interface WhoopWorkout {
   id: string;
+  v1_id?: number;
   user_id: number;
   created_at: string;
   updated_at: string;
@@ -97,8 +106,8 @@ export interface WhoopWorkout {
   timezone_offset: string;
   sport_id: number;
   sport_name: string;
-  score_state: string;
-  score: WorkoutScore;
+  score_state: ScoreState;
+  score?: WorkoutScore;
 }
 
 export interface CycleScore {
@@ -108,32 +117,25 @@ export interface CycleScore {
   max_heart_rate: number;
 }
 
-export interface CycleRecovery {
-  id: number;
-  score: number;
-  user_calibrating: boolean;
-  recovery_score: number;
-  resting_heart_rate: number;
-  hrv_rmssd_milli: number;
-  spo2_percentage: number;
-  skin_temp_celsius: number;
-}
-
 export interface WhoopCycle {
   id: number;
   user_id: number;
   created_at: string;
   updated_at: string;
   start: string;
-  end: string;
+  end?: string | null;
   timezone_offset: string;
-  score: CycleScore;
-  recovery: CycleRecovery;
+  score_state: ScoreState;
+  score?: CycleScore;
 }
 
 export interface ApiResponse<T> {
   records: T[];
   next_token?: string;
+}
+
+export interface ActivityIdMappingResponse {
+  v2_activity_id: string;
 }
 
 export interface TokenData {
@@ -173,6 +175,7 @@ export interface CombinedOutput {
   cycle?: WhoopCycle[];
   date: string;
   fetched_at: string;
+  pagination?: Partial<Record<DataType, string>>;
 }
 
 export type WhoopData = CombinedOutput;

@@ -66,28 +66,24 @@ export function analyzeTrends(
   );
 
   const recoveryScores = sortedRecovery
-    .filter(r => r.score?.recovery_score != null)
-    .map(r => r.score.recovery_score);
+    .flatMap((r) => (r.score?.recovery_score != null ? [r.score.recovery_score] : []));
 
   const hrvValues = sortedRecovery
-    .filter(r => r.score?.hrv_rmssd_milli != null)
-    .map(r => r.score.hrv_rmssd_milli);
+    .flatMap((r) => (r.score?.hrv_rmssd_milli != null ? [r.score.hrv_rmssd_milli] : []));
 
   const rhrValues = sortedRecovery
-    .filter(r => r.score?.resting_heart_rate != null)
-    .map(r => r.score.resting_heart_rate);
+    .flatMap((r) => (r.score?.resting_heart_rate != null ? [r.score.resting_heart_rate] : []));
 
   const sleepPerf = sortedSleep
-    .filter(s => s.score?.sleep_performance_percentage != null && !s.nap)
-    .map(s => s.score.sleep_performance_percentage);
+    .filter((s) => !s.nap)
+    .flatMap((s) => (s.score?.sleep_performance_percentage != null ? [s.score.sleep_performance_percentage] : []));
 
   const sleepHours = sortedSleep
-    .filter(s => s.score?.stage_summary?.total_in_bed_time_milli != null && !s.nap)
-    .map(s => s.score.stage_summary.total_in_bed_time_milli / 3600000);
+    .filter((s) => !s.nap)
+    .flatMap((s) => (s.score?.stage_summary?.total_in_bed_time_milli != null ? [s.score.stage_summary.total_in_bed_time_milli / 3600000] : []));
 
   const strainValues = sortedCycle
-    .filter(c => c.score?.strain != null)
-    .map(c => c.score.strain);
+    .flatMap((c) => (c.score?.strain != null ? [c.score.strain] : []));
 
   return {
     period,
@@ -118,9 +114,9 @@ export function generateInsights(
     new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
   );
 
-  const today = sortedRecovery[0]?.score;
-  const todaySleep = sortedSleep.find(s => !s.nap)?.score;
-  const todayCycle = sortedCycle[0]?.score;
+  const today = sortedRecovery.find((r) => r.score)?.score;
+  const todaySleep = sortedSleep.find((s) => !s.nap && s.score)?.score;
+  const todayCycle = sortedCycle.find((c) => c.score)?.score;
 
   if (today) {
     if (today.recovery_score >= 67) {
@@ -128,7 +124,7 @@ export function generateInsights(
         category: 'recovery',
         level: 'good',
         title: 'Green Recovery',
-        message: `Recovery at ${today.recovery_score}% — body is primed for high strain.`,
+        message: `Recovery at ${today.recovery_score.toFixed(0)}% — body is primed for high strain.`,
         action: 'Great day for intense training or competition.',
       });
     } else if (today.recovery_score >= 34) {
@@ -136,7 +132,7 @@ export function generateInsights(
         category: 'recovery',
         level: 'warning',
         title: 'Yellow Recovery',
-        message: `Recovery at ${today.recovery_score}% — moderate readiness.`,
+        message: `Recovery at ${today.recovery_score.toFixed(0)}% — moderate readiness.`,
         action: 'Consider moderate activity. Avoid max efforts.',
       });
     } else {
@@ -144,14 +140,16 @@ export function generateInsights(
         category: 'recovery',
         level: 'critical',
         title: 'Red Recovery',
-        message: `Recovery at ${today.recovery_score}% — body needs rest.`,
+        message: `Recovery at ${today.recovery_score.toFixed(0)}% — body needs rest.`,
         action: 'Prioritize rest, hydration, and sleep tonight.',
       });
     }
 
-    const hrvRecords = sortedRecovery.slice(0, 7).filter(r => r.score?.hrv_rmssd_milli);
+    const hrvRecords = sortedRecovery
+      .slice(0, 7)
+      .flatMap((r) => (r.score?.hrv_rmssd_milli != null ? [r.score.hrv_rmssd_milli] : []));
     const avgHrv = hrvRecords.length > 0
-      ? hrvRecords.reduce((a, r) => a + r.score.hrv_rmssd_milli, 0) / hrvRecords.length
+      ? hrvRecords.reduce((a, v) => a + v, 0) / hrvRecords.length
       : 0;
 
     if (avgHrv > 0 && today.hrv_rmssd_milli < avgHrv * 0.8) {
@@ -193,7 +191,7 @@ export function generateInsights(
       });
     }
 
-    if (todaySleep.sleep_efficiency_percentage < 85) {
+    if (todaySleep.sleep_efficiency_percentage != null && todaySleep.sleep_efficiency_percentage < 85) {
       insights.push({
         category: 'sleep',
         level: 'warning',
@@ -243,7 +241,7 @@ export function generateInsights(
     }
   }
 
-  if (workout.length === 0 && today?.recovery_score >= 67) {
+  if (workout.length === 0 && today?.recovery_score != null && today.recovery_score >= 67) {
     insights.push({
       category: 'strain',
       level: 'good',

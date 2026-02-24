@@ -73,9 +73,25 @@ whoopskill --sleep --recovery --body
 # Specific date (ISO format)
 whoopskill --date 2025-01-03
 
-# Pagination
-whoopskill workout --limit 50
+# Pagination (official max: 25/page)
+whoopskill workout --limit 25
 whoopskill workout --all
+whoopskill workout --next-token <token>
+
+# Query by id
+whoopskill sleep --id <sleep_uuid>
+whoopskill workout --id <workout_uuid>
+whoopskill cycle --id <cycle_id>
+
+# Query via cycle relation endpoints
+whoopskill sleep --cycle-id <cycle_id>
+whoopskill recovery --cycle-id <cycle_id>
+
+# v1 -> v2 activity mapping
+whoopskill mapping <v1_activity_id>
+
+# Revoke app access for current member
+whoopskill access revoke
 ```
 
 ## Auth Commands
@@ -121,13 +137,29 @@ whoopskill auth login
 | `workout` | Workouts with strain, HR zones, calories |
 | `cycle` | Daily physiological cycle (strain, calories) |
 
+## API Coverage
+
+The CLI covers WHOOP's published read/revoke API surfaces:
+
+- `GET /v2/user/profile/basic`
+- `GET /v2/user/measurement/body`
+- `GET /v2/activity/sleep`, `GET /v2/activity/sleep/{sleepId}`
+- `GET /v2/recovery`, `GET /v2/cycle/{cycleId}/recovery`
+- `GET /v2/activity/workout`, `GET /v2/activity/workout/{workoutId}`
+- `GET /v2/cycle`, `GET /v2/cycle/{cycleId}`, `GET /v2/cycle/{cycleId}/sleep`
+- `GET /v1/activity-mapping/{activityV1Id}`
+- `DELETE /v2/user/access`
+
 ## Options
 
 | Flag | Description |
 |------|-------------|
 | `-d, --date <date>` | Date in ISO format (YYYY-MM-DD) |
+| `-s, --start <date-time>` | Start datetime in ISO 8601 |
+| `-e, --end <date-time>` | End datetime in ISO 8601 |
 | `-l, --limit <n>` | Max results per page (default: 25) |
 | `-a, --all` | Fetch all pages |
+| `--next-token <token>` | Continue pagination from a previous response token |
 | `-p, --pretty` | Human-readable output |
 | `--profile` | Include profile |
 | `--body` | Include body measurements |
@@ -149,7 +181,8 @@ JSON to stdout by default. Use `--pretty` for human-readable format.
   "recovery": [{ "score": { "recovery_score": 52, "hrv_rmssd_milli": 38.9 }}],
   "sleep": [{ "score": { "sleep_performance_percentage": 40 }}],
   "workout": [{ "sport_name": "hiit", "score": { "strain": 6.2 }}],
-  "cycle": [{ "score": { "strain": 6.7 }}]
+  "cycle": [{ "score": { "strain": 6.7 }}],
+  "pagination": { "workout": "MTIzOjEyMzEyMw" }
 }
 ```
 
