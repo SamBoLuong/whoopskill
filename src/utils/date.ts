@@ -17,10 +17,10 @@ export function formatDate(date: Date): string {
 export function getDateRange(date: string): { start: string; end: string } {
   const d = new Date(date);
   const start = new Date(d);
-  start.setHours(WHOOP_DAY_START_HOUR, 0, 0, 0);
+  start.setUTCHours(WHOOP_DAY_START_HOUR, 0, 0, 0);
 
   const end = new Date(start);
-  end.setDate(end.getDate() + 1);
+  end.setUTCDate(end.getUTCDate() + 1);
 
   return {
     start: start.toISOString(),
