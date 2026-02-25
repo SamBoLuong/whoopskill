@@ -1,7 +1,7 @@
 ---
 name: whoopskill
-description: WHOOP CLI with health insights, trends analysis, and data fetching (sleep, recovery, HRV, strain).
-homepage: https://github.com/koala73/whoopskill
+description: WHOOP health metrics CLI for sleep, recovery, HRV, strain, and workout data. Use when the user asks about their WHOOP data, health metrics, fitness tracking, sleep analysis, recovery scores, HRV, training strain, or health trends. Triggers: "my WHOOP", "WHOOP data", "recovery score", "HRV", "sleep quality", "strain", "health trends".
+homepage: https://github.com/SamBoLuong/whoopskill
 metadata: {"clawdis":{"emoji":"💪","requires":{"bins":["node"],"env":["WHOOP_CLIENT_ID","WHOOP_CLIENT_SECRET","WHOOP_REDIRECT_URI"]},"install":[{"id":"npm","kind":"npm","package":"whoopskill","bins":["whoopskill"],"label":"Install whoopskill (npm)"}]}}
 ---
 
@@ -9,7 +9,18 @@ metadata: {"clawdis":{"emoji":"💪","requires":{"bins":["node"],"env":["WHOOP_C
 
 Use `whoopskill` to fetch WHOOP health metrics (sleep, recovery, HRV, strain, workouts).
 
-Install: `npm install -g whoopskill` | [GitHub](https://github.com/koala73/whoopskill)
+## When to Use
+
+Use this skill when the user asks about:
+- Their WHOOP data or metrics
+- Sleep quality, patterns, or stages
+- Recovery status or score
+- HRV (heart rate variability) or RHR (resting heart rate)
+- Strain levels or workout intensity
+- Health trends over time
+- Training recommendations based on recovery
+
+Install: `npm install -g whoopskill` | [GitHub](https://github.com/SamBoLuong/whoopskill)
 
 Quick start
 - `whoopskill summary` — one-liner: Recovery: 52% | HRV: 39ms | Sleep: 40% | Strain: 6.7
@@ -63,6 +74,12 @@ Notes
 - Uses WHOOP API v2
 - Date follows WHOOP day boundary (4am cutoff)
 - WHOOP apps with <10 users don't need review (immediate use)
+
+Error Handling
+- **Token expired**: Auto-refreshes; if refresh fails, run `whoopskill auth login`
+- **No data for date**: Returns empty array `[]` for that data type
+- **Auth required**: Commands prompt to run `whoopskill auth login` if no tokens exist
+- **Rate limits**: WHOOP API has rate limits; wait and retry if errors occur
 
 Sample: `whoopskill summary --color`
 ```
