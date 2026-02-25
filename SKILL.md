@@ -26,8 +26,10 @@ Quick start
 - `whoopskill summary` — one-liner: Recovery: 52% | HRV: 39ms | Sleep: 40% | Strain: 6.7
 - `whoopskill summary --color` — color-coded summary with 🟢🟡🔴 status indicators
 - `whoopskill trends` — 7-day trends with averages and direction arrows
-- `whoopskill trends --days 30 --pretty` — 30-day trend analysis
-- `whoopskill insights --pretty` — AI-style health recommendations
+- `whoopskill trends --days 30` — 30-day trend analysis
+- `whoopskill trends --json` — raw JSON output
+- `whoopskill insights` — AI-style health recommendations
+- `whoopskill insights --json` — raw JSON output
 - `whoopskill --pretty` — human-readable output with emojis
 - `whoopskill recovery` — recovery score, HRV, RHR
 - `whoopskill sleep` — sleep performance, stages
@@ -40,8 +42,8 @@ Quick start
 
 Analysis commands
 - `summary` — quick health snapshot (add `--color` for status indicators)
-- `trends` — multi-day averages with trend arrows (↑↓→)
-- `insights` — personalized recommendations based on your data
+- `trends` — multi-day averages with trend arrows (↑↓→), add `--json` for raw output
+- `insights` — personalized recommendations, add `--json` for raw output
 
 Data types
 - `profile` — user info (name, email)
@@ -122,7 +124,7 @@ Sample: `whoopskill insights`
    → Room for 13.9 more strain today.
 ```
 
-Sample: `whoopskill --sleep --recovery` (JSON)
+Sample: `whoopskill --pretty` (full output)
 ```json
 {
   "date": "2026-01-05",
