@@ -64,11 +64,13 @@ interface SummaryOptions {
 interface TrendsOptions {
   days: string;
   json?: boolean;
+  pretty?: boolean;
 }
 
 interface InsightsOptions {
   date?: string;
   json?: boolean;
+  pretty?: boolean;
 }
 
 type SingleRecord = WhoopSleep | WhoopRecovery | WhoopWorkout | WhoopCycle;
@@ -336,6 +338,7 @@ program
   .description('Show trends over time (7/14/30 days)')
   .option('-n, --days <number>', 'Number of days to analyze', '7')
   .option('--json', 'Output raw JSON instead of formatted text')
+  .option('-p, --pretty', 'Human-readable output')
   .action(async (options: TrendsOptions) => {
     try {
       const days = Number.parseInt(options.days, 10);
@@ -365,6 +368,7 @@ program
   .description('AI-style health insights and recommendations')
   .option('-d, --date <date>', 'Date in ISO format (YYYY-MM-DD)')
   .option('--json', 'Output raw JSON instead of formatted text')
+  .option('-p, --pretty', 'Human-readable output')
   .action(async (options: InsightsOptions) => {
     try {
       const date = options.date || getWhoopDay();
